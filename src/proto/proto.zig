@@ -11,7 +11,7 @@ pub const DatabasePacketContent = union {
 };
 pub const DatabasePacket = struct {
     type: DatabaseRequest,
-    owner: u32,
+    owner: [64]u8,
     permissions: u8,
     data: DatabasePacketContent,
 };

@@ -11,7 +11,7 @@ pub fn main() !void {
     std.log.info("size: {any}", .{DBPkt.getSize()});
     const pkt = &nomad_proto.DatabasePacket{
         .type = .FETCH,
-        .owner = 0,
+        .owner = std.mem.zeroes([64]u8),
         .permissions = 0,
         .data = .{
             .hash = 0,
