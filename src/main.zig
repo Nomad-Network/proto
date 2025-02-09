@@ -5,21 +5,28 @@ const std = @import("std");
 const nomad = @import("nomad");
 const nomad_proto = @import("nomad-proto");
 
-const DBPkt = nomad_proto.PacketDefinition(nomad_proto.DatabasePacket, std.heap.page_allocator);
+const ProtoPacket = nomad_proto.PacketDefinition(nomad_proto.ProtocolPacket, std.heap.page_allocator);
 
 pub fn main() !void {
-    std.log.info("size: {any}", .{DBPkt.getSize()});
-    const pkt = &nomad_proto.DatabasePacket{
-        .type = .FETCH,
-        .owner = std.mem.zeroes([64]u8),
-        .permissions = 0,
-        .data = .{
-            .hash = 0,
+    std.log.info("size: {any}", .{ProtoPacket.getSize()});
+    const pkt = &nomad_proto.ProtocolPacket{
+        .type = .DATABASE,
+        .version = [4]u8{ 0, 0, 0, 0 },
+        .signed = false,
+        .content = .{
+            .database = .{
+                .type = .INSERT,
+                .owner = std.mem.zeroes([64]u8),
+                .permissions = 0,
+                .data = .{
+                    .data = std.mem.zeroes([2048]u8),
+                },
+            },
         },
     };
-    const data = DBPkt.serialize(pkt);
+    const data = ProtoPacket.serialize(pkt);
     std.log.info("data: {any}", .{data});
-    const inst = DBPkt.deserialize(data);
+    const inst = ProtoPacket.deserialize(data);
     std.log.info("pkt: {any}", .{inst});
     var db = try nomad.Database.init(std.heap.page_allocator, "test.nd");
     try db.print();
